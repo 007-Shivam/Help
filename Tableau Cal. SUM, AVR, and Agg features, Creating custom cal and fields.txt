@@ -1,0 +1,17 @@
+1. Use SUM Function
+	i) Drag a "Profit" to Rows or Columns shelf.
+
+2. Use AVG Function
+	i) Drag a "Profit" and switch aggregation to Average
+
+3. Use Other Aggregate Functions
+	i) COUNT: COUNT([FieldName])
+	ii) MIN: MIN([FieldName])
+	iii) MAX: MAX([FieldName])
+	iv) COUNTD: COUNTD([FieldName])
+
+4. Create Custom Calculated Fields
+	i) Go to the top menu > Analysis > Create Calculated Field 
+	ii) Create Calculated Field.
+	iii) Enter formula (e.g., [Sales] - [Profit]) and name it "Formula1".
+	iv) Click OK.

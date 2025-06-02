@@ -1,0 +1,13 @@
+1. Create a Word Cloud
+	i) Drag Customer Name to the Text card
+	ii) Drag Region to Filter and select West.
+	iii) Drag while holding the right mouse button Customer Name and drop it on Size. Then select CNT(Customer Name)
+	iv) changing the mark type to Text.
+	v) dragging Customer Name to Filters and click the “Top” tab. Select By field and specify Top 20 by Customer Name (Count)
+	vi) drag while holding Control CNT(Customer Name) to the Colour card
+
+2. Create a Bar Graph
+	i) Drag the text field to Rows.
+	ii) Drag it again to Columns, but set aggregation to Count or CountD.
+	iii) Sort bars descending by frequency.
+	iv) Format labels, colors, and axes for clarity.
