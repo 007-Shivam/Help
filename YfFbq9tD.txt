@@ -1,0 +1,744 @@
+# code 1
+1. Hyperparameter Tuning
+Experiment with different sets of hyperparameters using techniques like grid search to optimize model performance.
+ 
+ 
+import pandas as pd
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.ensemble import RandomForestClassifier
+ 
+df = pd.read_csv('iris.csv')
+X = df.drop('target', axis=1)
+y = df['target']
+ 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+ 
+params = {'n_estimators': [50, 100], 'max_depth': [3, 5, 7]}
+grid = GridSearchCV(RandomForestClassifier(), params, cv=5)
+grid.fit(X_train, y_train)
+ 
+print("Best Parameters:", grid.best_params_)
+print("Test Accuracy:", grid.score(X_test, y_test))
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# code 2
+Evaluate the impact of different subsets of features using selection methods like SelectKBest to improve model accuracy and reduce overfitting.
+ 
+ 
+import pandas as pd
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+ 
+df = pd.read_csv('iris.csv')
+X = df.drop('target', axis=1)
+y = df['target']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+ 
+selector = SelectKBest(score_func=f_classif, k=5)
+model = Pipeline([('select', selector), ('clf', LogisticRegression())])
+model.fit(X_train, y_train)
+ 
+print("Test Accuracy:", model.score(X_test, y_test))
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# Code 3 
+Compare multiple models (e.g., SVM, Random Forest, Gradient Boosting) on the same dataset to determine the best-performing algorithm.
+ 
+ 
+ 
+import pandas as pd
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+ 
+df = pd.read_csv('iris.csv')
+X = df.drop('target', axis=1)
+y = df['target']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+ 
+models = [SVC(), RandomForestClassifier(), GradientBoostingClassifier()]
+for m in models:
+    m.fit(X_train, y_train)
+    print(f"{m.__class__.__name__}: {accuracy_score(y_test, m.predict(X_test))}")
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# code 4: Data Preprocessing Variations
+Test different preprocessing techniques such as normalization, standardization, and imputation to observe their effect on model performance.
+ 
+ 
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+ 
+# Load the dataset
+data = pd.read_csv('titanic.csv')
+ 
+# Display the first few rows
+print("Initial data sample:")
+print(data.head())
+ 
+# Step 1: Handle missing values using mean imputation for Age and SibSp
+imputer = SimpleImputer(strategy='mean')
+data['Age'] = imputer.fit_transform(data[['Age']])
+data['SibSp'] = imputer.fit_transform(data[['SibSp']])  # <- FIXED THIS
+ 
+# Step 2: Encode categorical variables (e.g., Sex)
+data['Sex'] = data['Sex'].map({'male': 0, 'female': 1})
+ 
+# Step 3: Select features and target variable
+X = data[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']]
+y = data['Survived']
+ 
+# Step 4: Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Step 5: Normalize the features using Min-Max Scaling
+scaler = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+ 
+# Step 6: Train a simple model (Logistic Regression)
+model = LogisticRegression()
+model.fit(X_train_scaled, y_train)
+ 
+# Step 7: Make predictions and evaluate the model
+y_pred = model.predict(X_test_scaled)
+accuracy = accuracy_score(y_test, y_pred)
+print(f'\nModel Accuracy: {accuracy:.2f}')
+ 
+ 
+ 
+# Dataset 4 
+PassengerId	Survived	Pclass	Sex	Age	SibSp	Parch	Fare
+1	0	3	male	22	1	0	7.25
+2	1	1	female	38	1	0	71.2833
+3	1	3	female	26	0	0	7.925
+4	1	1	female	35	1	0	53.1
+5	0	3	male	35		0	8.05
+6	0	3	male		0	0	8.4583
+7	0	1	male	54	0	0	51.8625
+8	0	3	male	2	3	1	21.075
+9	1	3	female	27	0	2	11.1333
+10	1	2	female	14	1	0	30.0708
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# code 5 Use ensemble strategies like bagging and boosting to enhance performance compared to base models.
+ 
+# Bagging 
+import pandas as pd
+from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+ 
+# Load dataset
+data = pd.read_csv('iris.csv')
+ 
+# Features and target
+X = data.iloc[:, :-1]
+y = data.iloc[:, -1]
+ 
+# Encode target if it's categorical
+if y.dtype == 'object':
+    le = LabelEncoder()
+    y = le.fit_transform(y)
+ 
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Bagging with Random Forest as base estimator
+bagging_model = BaggingClassifier(RandomForestClassifier(), n_estimators=50, random_state=42)
+bagging_model.fit(X_train, y_train)
+ 
+# Predict and evaluate
+y_pred = bagging_model.predict(X_test)
+print("Bagging Model Accuracy:", accuracy_score(y_test, y_pred))
+ 
+ 
+ 
+ 
+# Boosting
+import pandas as pd
+import xgboost as xgb
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+ 
+# Load dataset
+data = pd.read_csv('iris.csv')
+ 
+# Features and target
+X = data.iloc[:, :-1]
+y = data.iloc[:, -1]
+ 
+# If target is categorical strings, encode it to numbers
+if y.dtype == 'object':
+    le = LabelEncoder()
+    y = le.fit_transform(y)
+ 
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Boosting with XGBoost
+boosting_model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, random_state=42,
+                                   use_label_encoder=False, eval_metric='mlogloss')
+boosting_model.fit(X_train, y_train)
+ 
+# Predict and evaluate
+y_pred = boosting_model.predict(X_test)
+print("Boosting Model Accuracy (XGBoost):", accuracy_score(y_test, y_pred))
+ 
+ 
+ 
+ 
+# stacking
+import pandas as pd
+from sklearn.ensemble import StackingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+ 
+# Load dataset
+data = pd.read_csv('iris.csv')
+ 
+# Assuming the last column is the target and the rest are features
+X = data.iloc[:, :-1]  # features (all columns except last)
+y = data.iloc[:, -1]   # target (last column)
+ 
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Define base models
+base_models = [
+    ('rf', RandomForestClassifier(n_estimators=50, random_state=42)),
+    ('svc', SVC(kernel='linear', probability=True, random_state=42))
+]
+ 
+# Meta model
+meta_model = LogisticRegression()
+ 
+# Stacking classifier
+stacking_model = StackingClassifier(estimators=base_models, final_estimator=meta_model)
+stacking_model.fit(X_train, y_train)
+ 
+# Predict and evaluate
+y_pred = stacking_model.predict(X_test)
+print("Stacking Model Accuracy:", accuracy_score(y_test, y_pred))
+ 
+ 
+ 
+#Dataset 5: iris dataset
+sepal length (cm)	sepal width (cm)	petal length (cm)	petal width (cm)	target
+5.1	3.5	1.4	0.2	0
+4.9	3	1.4	0.2	0
+4.7	3.2	1.3	0.2	0
+4.6	3.1	1.5	0.2	0
+5	3.6	1.4	0.2	0
+5.4	3.9	1.7	0.4	0
+4.6	3.4	1.4	0.3	0
+5	3.4	1.5	0.2	0
+4.4	2.9	1.4	0.2	0
+4.9	3.1	1.5	0.1	0
+5.4	3.7	1.5	0.2	0
+4.8	3.4	1.6	0.2	0
+4.8	3	1.4	0.1	0
+4.3	3	1.1	0.1	0
+5.8	4	1.2	0.2	0
+5.7	4.4	1.5	0.4	0
+5.4	3.9	1.3	0.4	0
+5.1	3.5	1.4	0.3	0
+5.7	3.8	1.7	0.3	0
+5.1	3.8	1.5	0.3	0
+5.4	3.4	1.7	0.2	0
+5.1	3.7	1.5	0.4	0
+4.6	3.6	1	0.2	0
+5.1	3.3	1.7	0.5	0
+4.8	3.4	1.9	0.2	0
+5	3	1.6	0.2	0
+5	3.4	1.6	0.4	0
+5.2	3.5	1.5	0.2	0
+5.2	3.4	1.4	0.2	0
+4.7	3.2	1.6	0.2	0
+4.8	3.1	1.6	0.2	0
+5.4	3.4	1.5	0.4	0
+5.2	4.1	1.5	0.1	0
+5.5	4.2	1.4	0.2	0
+4.9	3.1	1.5	0.2	0
+5	3.2	1.2	0.2	0
+5.5	3.5	1.3	0.2	0
+4.9	3.6	1.4	0.1	0
+4.4	3	1.3	0.2	0
+5.1	3.4	1.5	0.2	0
+5	3.5	1.3	0.3	0
+4.5	2.3	1.3	0.3	0
+4.4	3.2	1.3	0.2	0
+5	3.5	1.6	0.6	0
+5.1	3.8	1.9	0.4	0
+4.8	3	1.4	0.3	0
+5.1	3.8	1.6	0.2	0
+4.6	3.2	1.4	0.2	0
+5.3	3.7	1.5	0.2	0
+5	3.3	1.4	0.2	0
+7	3.2	4.7	1.4	1
+6.4	3.2	4.5	1.5	1
+6.9	3.1	4.9	1.5	1
+5.5	2.3	4	1.3	1
+6.5	2.8	4.6	1.5	1
+5.7	2.8	4.5	1.3	1
+6.3	3.3	4.7	1.6	1
+4.9	2.4	3.3	1	1
+6.6	2.9	4.6	1.3	1
+5.2	2.7	3.9	1.4	1
+5	2	3.5	1	1
+5.9	3	4.2	1.5	1
+6	2.2	4	1	1
+6.1	2.9	4.7	1.4	1
+5.6	2.9	3.6	1.3	1
+6.7	3.1	4.4	1.4	1
+5.6	3	4.5	1.5	1
+5.8	2.7	4.1	1	1
+6.2	2.2	4.5	1.5	1
+5.6	2.5	3.9	1.1	1
+5.9	3.2	4.8	1.8	1
+6.1	2.8	4	1.3	1
+6.3	2.5	4.9	1.5	1
+6.1	2.8	4.7	1.2	1
+6.4	2.9	4.3	1.3	1
+6.6	3	4.4	1.4	1
+6.8	2.8	4.8	1.4	1
+6.7	3	5	1.7	1
+6	2.9	4.5	1.5	1
+5.7	2.6	3.5	1	1
+5.5	2.4	3.8	1.1	1
+5.5	2.4	3.7	1	1
+5.8	2.7	3.9	1.2	1
+6	2.7	5.1	1.6	1
+5.4	3	4.5	1.5	1
+6	3.4	4.5	1.6	1
+6.7	3.1	4.7	1.5	1
+6.3	2.3	4.4	1.3	1
+5.6	3	4.1	1.3	1
+5.5	2.5	4	1.3	1
+5.5	2.6	4.4	1.2	1
+6.1	3	4.6	1.4	1
+5.8	2.6	4	1.2	1
+5	2.3	3.3	1	1
+5.6	2.7	4.2	1.3	1
+5.7	3	4.2	1.2	1
+5.7	2.9	4.2	1.3	1
+6.2	2.9	4.3	1.3	1
+5.1	2.5	3	1.1	1
+5.7	2.8	4.1	1.3	1
+6.3	3.3	6	2.5	2
+5.8	2.7	5.1	1.9	2
+7.1	3	5.9	2.1	2
+6.3	2.9	5.6	1.8	2
+6.5	3	5.8	2.2	2
+7.6	3	6.6	2.1	2
+4.9	2.5	4.5	1.7	2
+7.3	2.9	6.3	1.8	2
+6.7	2.5	5.8	1.8	2
+7.2	3.6	6.1	2.5	2
+6.5	3.2	5.1	2	2
+6.4	2.7	5.3	1.9	2
+6.8	3	5.5	2.1	2
+5.7	2.5	5	2	2
+5.8	2.8	5.1	2.4	2
+6.4	3.2	5.3	2.3	2
+6.5	3	5.5	1.8	2
+7.7	3.8	6.7	2.2	2
+7.7	2.6	6.9	2.3	2
+6	2.2	5	1.5	2
+6.9	3.2	5.7	2.3	2
+5.6	2.8	4.9	2	2
+7.7	2.8	6.7	2	2
+6.3	2.7	4.9	1.8	2
+6.7	3.3	5.7	2.1	2
+7.2	3.2	6	1.8	2
+6.2	2.8	4.8	1.8	2
+6.1	3	4.9	1.8	2
+6.4	2.8	5.6	2.1	2
+7.2	3	5.8	1.6	2
+7.4	2.8	6.1	1.9	2
+7.9	3.8	6.4	2	2
+6.4	2.8	5.6	2.2	2
+6.3	2.8	5.1	1.5	2
+6.1	2.6	5.6	1.4	2
+7.7	3	6.1	2.3	2
+6.3	3.4	5.6	2.4	2
+6.4	3.1	5.5	1.8	2
+6	3	4.8	1.8	2
+6.9	3.1	5.4	2.1	2
+6.7	3.1	5.6	2.4	2
+6.9	3.1	5.1	2.3	2
+5.8	2.7	5.1	1.9	2
+6.8	3.2	5.9	2.3	2
+6.7	3.3	5.7	2.5	2
+6.7	3	5.2	2.3	2
+6.3	2.5	5	1.9	2
+6.5	3	5.2	2	2
+6.2	3.4	5.4	2.3	2
+5.9	3	5.1	1.8	2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# 6. Regularization Techniques
+Apply L1 (Lasso) and L2 (Ridge) regularization to understand their influence on overfitting and generalization.
+ 
+ 
+# Lasso
+from sklearn.linear_model import Lasso
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+ 
+# Load dataset
+data = load_iris()
+X = data.data
+y = data.target
+ 
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Lasso (L1 regularization) regression model
+lasso_model = Lasso(alpha=0.1)  # alpha controls the regularization strength
+lasso_model.fit(X_train, y_train)
+ 
+# Predict and evaluate
+y_pred = lasso_model.predict(X_test)
+print("Lasso Model MSE:", mean_squared_error(y_test, y_pred))
+ 
+ 
+ 
+# Ridge 
+from sklearn.linear_model import Ridge
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+ 
+# Load dataset
+data = load_iris()
+X = data.data
+y = data.target
+ 
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Ridge (L2 regularization) regression model
+ridge_model = Ridge(alpha=1.0)  # alpha controls the regularization strength
+ridge_model.fit(X_train, y_train)
+ 
+# Predict and evaluate
+y_pred = ridge_model.predict(X_test)
+print("Ridge Model MSE:", mean_squared_error(y_test, y_pred))
+ 
+ 
+ 
+# Dataset is same iris of above code 5
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# Code 7: 
+Evaluate the robustness of models using strategies like K-Fold and Stratified K-Fold cross-validation.
+ 
+ 
+ 
+# K-fold 
+ 
+from sklearn.datasets import load_iris
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+ 
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+ 
+# Define the model
+model = LogisticRegression(max_iter=200)
+ 
+# Define K-Fold cross-validator
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+ 
+# Evaluate model with cross-validation
+scores = cross_val_score(model, X, y, cv=kf, scoring='accuracy')
+ 
+# Print the results
+print("Accuracy scores for each fold:", scores)
+print("Mean accuracy:", np.mean(scores))
+print("Standard deviation:", np.std(scores))
+ 
+ 
+ 
+ 
+# Stratified K-fold 
+ 
+import pandas as pd
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.linear_model import LogisticRegression
+ 
+df = pd.read_csv('iris.csv')
+X = df.drop('target', axis=1)
+y = df['target']
+ 
+cv = StratifiedKFold(n_splits=5)
+scores = cross_val_score(LogisticRegression(), X, y, cv=cv)
+print("Stratified K-Fold Accuracy:", scores.mean())
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# Code 8.
+Learning Rate and Batch Size in Neural Networks
+Analyze how different learning rates and batch sizes affect training speed and model accuracy in neural networks.
+ 
+ 
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.callbacks import EarlyStopping
+import matplotlib.pyplot as plt
+ 
+# Load MNIST dataset (just for example)
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train = x_train.reshape(-1, 28 * 28).astype("float32") / 255
+x_test = x_test.reshape(-1, 28 * 28).astype("float32") / 255
+ 
+# Create a simple neural network model
+def create_model(learning_rate):
+    model = Sequential([
+        Dense(128, activation='relu', input_shape=(28 * 28,)),
+        Dense(10, activation='softmax')
+    ])
+    model.compile(
+        optimizer=Adam(learning_rate=learning_rate),
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    return model
+ 
+# Define different learning rates and batch sizes to test
+learning_rates = [0.001, 0.01, 0.1]
+batch_sizes = [32, 64, 128]
+ 
+# To store the results
+results = {}
+ 
+# Experiment with different learning rates and batch sizes
+for lr in learning_rates:
+    for batch_size in batch_sizes:
+        print(f"Training with learning rate={lr} and batch size={batch_size}")
+ 
+        # Create model
+        model = create_model(lr)
+ 
+        # Train the model
+        history = model.fit(
+            x_train, y_train,
+            epochs=10,
+            batch_size=batch_size,
+            validation_data=(x_test, y_test),
+            verbose=0,
+            callbacks=[EarlyStopping(monitor='val_loss', patience=3)]
+        )
+ 
+        # Store the result: final validation accuracy
+        results[(lr, batch_size)] = history.history['val_accuracy'][-1]
+ 
+# Plotting the results
+fig, ax = plt.subplots(figsize=(10, 6))
+for lr in learning_rates:
+    accuracies = [results[(lr, batch_size)] for batch_size in batch_sizes]
+    ax.plot(batch_sizes, accuracies, label=f"lr={lr}")
+ 
+ax.set_title("Effect of Learning Rate and Batch Size on Validation Accuracy")
+ax.set_xlabel("Batch Size")
+ax.set_ylabel("Validation Accuracy")
+ax.legend()
+ax.set_xscale('log')
+plt.show()
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# code 9: Data Augmentation
+For image data, apply augmentation techniques (e.g., flipping, shifting, rotating) to improve generalization on unseen data.
+ 
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+ 
+# Create an instance of ImageDataGenerator with various augmentation techniques
+data_augmentation = ImageDataGenerator(
+    rotation_range=40,              # Randomly rotate images in the range (degrees)
+    width_shift_range=0.2,          # Randomly translate images horizontally (fraction of total width)
+    height_shift_range=0.2,         # Randomly translate images vertically (fraction of total height)
+    shear_range=0.2,                # Shear angle in counter-clockwise direction in degrees
+    zoom_range=0.2,                 # Randomly zoom into images
+    horizontal_flip=True,           # Randomly flip images
+    fill_mode='nearest'             # Fill mode for new pixels
+)
+ 
+# Load an example image (make sure to replace 'example_image.jpg' with your actual image file)
+img = tf.keras.preprocessing.image.load_img("/content/cat4.jpg")  # Load the image
+x = tf.keras.preprocessing.image.img_to_array(img)            # Convert the image to a numpy array
+x = tf.expand_dims(x, axis=0)                                 # Add a batch dimension
+ 
+# Generate augmented images
+num_images = 5  # Number of augmented images to display
+augmented_images = []
+ 
+for batch in data_augmentation.flow(x, batch_size=1):
+    augmented_images.append(tf.squeeze(batch[0]).numpy().astype("uint8"))  # Store the augmented image
+    if len(augmented_images) >= num_images:  # Stop after generating the desired number of images
+        break
+ 
+# Plot the augmented images side by side
+plt.figure(figsize=(12, 5))  # Set the figure size
+for i in range(num_images):
+    plt.subplot(1, num_images, i + 1)  # Create a subplot for each image
+    plt.imshow(augmented_images[i])   # Display the augmented image
+    plt.axis('off')                   # Hide the axis
+ 
+plt.show()  # Show the figure with all augmented images
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# code 10:
+Use pre-trained deep learning models (e.g., VGG16) and fine-tune them on your custom dataset, comparing with models trained from scratch.
+ 
+ 
+import numpy as np
+import tensorflow as tf
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+ 
+# Load Iris dataset
+data = load_iris()
+X = data.data  # shape: (150, 4)
+y = data.target  # shape: (150,)
+ 
+# One-hot encode the labels
+y = to_categorical(y, num_classes=3)
+ 
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+# Normalize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+ 
+# Create a simple neural network model
+model = Sequential([
+    Dense(64, activation='relu', input_shape=(4,)),
+    Dense(32, activation='relu'),
+    Dense(3, activation='softmax')  # 3 classes for Iris
+])
+ 
+# Compile the model
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+ 
+# Train the model
+history = model.fit(X_train, y_train,
+                    epochs=50,
+                    batch_size=8,
+                    validation_data=(X_test, y_test),
+                    verbose=1)
+ 
+# Evaluate the model
+test_loss, test_accuracy = model.evaluate(X_test, y_test)
+print(f"Test Accuracy: {test_accuracy:.4f}")
+ 
